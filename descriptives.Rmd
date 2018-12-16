@@ -1,0 +1,92 @@
+---
+title: "descriptives"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r}
+library(ggplot2)
+library(tidyverse)
+library(readxl)
+```
+
+```{r}
+myZipFile<-"http://biogeo.ucdavis.edu/data/diva/adm/YEM_adm.zip"
+download.file(myZipFile,destfile = "Yemen.zip")
+unzip("Yemen.zip")
+setwd("/Users/AZAG/Desktop/Data Science/Final Project")
+airstrike <- read_xlsx("airstrike_log_lat_new.xlsx")
+foodsec <- read_xlsx("FoodIS_by month.xlsx")
+foodseclong <- read_xlsx("FSC_Long1.xlsx")
+```
+
+```{r}
+as <- airstrike %>%
+  separate(Date, c("day", "month", "year"), "/")
+
+colnames(as)[colnames(as)=="Main category"] <- "tartype"
+
+head(as)
+```
+
+```{r}
+table(as$`tartype`)
+table(as$"tartype", as$year)
+```
+
+```{r}
+p <- as %>% 
+  filter(year== "2015") %>% 
+  ggplot(aes(x=tartype))+
+  geom_bar()+
+  theme(axis.text.x = element_text(angle=90, hjust=1))
+p
+```
+
+```{r}
+p1 <- as %>% 
+  filter(year!="2018") %>%
+  ggplot(aes(x=tartype, fill=tartype))+
+  geom_bar()+
+  scale_fill_hue(l=25)+
+  facet_wrap(~year)+
+  theme(axis.text.x = element_text(angle=60, hjust=1), legend.position="none")+
+  xlab("Facility targeted by aistrikes") + 
+  ylab("Total number of airstrikes") +
+  ggtitle("Total number of airstrikes by year") + 
+  scale_color_discrete(name = "tartype")
+p1
+```
+```{r}
+p2 <- as %>% 
+  filter(year!="2018") %>%
+  ggplot(aes(x=tartype, fill=tartype))+
+  geom_bar()+
+  scale_fill_hue(l=25)+
+  facet_wrap(~year)+
+  theme(axis.text.x=element_blank(), 
+        axis.ticks.x=element_blank())+
+  xlab("Type of facility targeted by aistrikes") + 
+  ylab("Total number of airstrikes") +
+  ggtitle("Total number of airstrikes by year") + 
+  scale_color_discrete(name = "tartype")
+p2
+```
+
+```{r}
+p3 <- as %>% 
+  filter(year!="2018") %>%
+  ggplot(aes(x=tartype))+
+  geom_bar()+
+  facet_wrap(~year)+
+  theme(axis.text.x = element_text(angle=65, hjust=1))+
+  xlab("Type of facility targeted by aistrikes") + 
+  ylab("Total number of airstrikes") +
+  ggtitle("Total number of airstrikes by year")
+p3
+```
+```{r}
+
+```
+
