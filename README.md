@@ -1,4 +1,4 @@
-### Airstrikes and food insecurity in Yemen
+# Airstrikes and food insecurity in Yemen
 Data Science Final Project
 Fall 2018
 
