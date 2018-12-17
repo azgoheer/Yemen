@@ -1,0 +1,147 @@
+---
+title: "Food and Airstrikes over Time by Region"
+author: ""
+date: ""
+output: html_document
+---
+```{r include=FALSE}
+setwd("/Users/Susie/Desktop/HSPH/Course_Work/2018_Fall/Intro to Data Science/Final Project/Data")
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, collapse = TRUE, tidy = TRUE)
+rm(list=ls())
+library(foreign)
+library(lme4)
+library(tidyverse)
+library(lmtest)
+library(psych)
+library(kableExtra)
+library(lmtest)
+library(arm)
+library(haven)
+library(readstata13)
+library(ggthemes)
+library(ggrepel)
+library(gridExtra)
+library(dplyr)
+library(stargazer)
+library(texreg)
+library(lubridate)
+library(ggplot2)
+library(formula.tools)
+library(texreg)
+library(sf)
+library(readxl)
+
+```
+
+
+```{r include=FALSE}
+getwd()
+```
+
+
+```{r include=FALSE}
+# Load the Data Sets
+food1 <- read_excel("/Users/Susie/Desktop/HSPH/Course_Work/2018_Fall/Intro to Data Science/Final Project/Data/Food_Insecturity_AdminUnits.xlsx")
+
+FSC_Long1 <- read_excel("/Users/Susie/Desktop/HSPH/Course_Work/2018_Fall/Intro to Data Science/Final Project/Data/FSC_Long1.xlsx")
+
+airstrikes_as <- read_excel("/Users/Susie/Desktop/HSPH/Course_Work/2018_Fall/Intro to Data Science/Final Project/Data/airstrike_full.xlsx")
+
+airstrikes_sum <- read_excel("/Users/Susie/Desktop/HSPH/Course_Work/2018_Fall/Intro to Data Science/Final Project/Data/airstrike_sum.xlsx")
+```
+
+
+```{r include=FALSE}
+# Clean Data Sets
+food <- FSC_Long1 %>% dplyr::select("TimeName","TIME","COUNTER","AdminStrata","Mean") %>% filter(TIME!=0)
+```
+
+
+```{r include=FALSE}
+#Investigating Food Insecurity Trends by Region
+food_plot1 <- food  %>% ggplot(aes(x=COUNTER,y=Mean)) + geom_smooth() + facet_wrap(~ AdminStrata) + xlab(c("Months since start of Bombardment"))
+
+food_plot1
+```
+
+
+```{r echo=FALSE}
+#Investigating Airstrike Patterns by Region
+plot_as_sum <- airstrikes_sum %>% ggplot(aes(counter, Airstrike)) + geom_line() + facet_wrap(~Governate)
+plot_as_sum
+```
+
+
+##Sa'dah
+```{r include=FALSE}
+# Sa'dah - Data 
+Dat_sadah.a <-airstrikes_sum %>% filter(Governate=="Sa'dah")
+dat_sadah.f <-food %>% filter(AdminStrata=="Sa'dah")
+```
+
+
+```{r echo=FALSE, warning=FALSE}
+Sadah<- ggplot() + geom_line(data= Dat_sadah.a, aes(counter, (Airstrike^(1/2)), col="Airstrike^(1/2)")) + geom_line(data = dat_sadah.f, aes(x=COUNTER,y=Mean, col = "Food Consumption Score")) + xlab("Months Since Start of Bombardment") + ylab("") + ggtitle("Sa'dah Airstrikes and Food Consumption Score from Jan 2015-May 2018") + scale_x_continuous(limits = c(0, 45)) + theme(legend.position="bottom")
+Sadah
+```
+
+## Taizz
+```{r include=FALSE}
+Dat_taizz.a <-airstrikes_sum %>% filter(Governate=="Taizz")
+dat_taizz.f <-food %>% filter(AdminStrata=="Taizz")
+```
+
+
+```{r echo=FALSE, warning=FALSE}
+Taizz <- ggplot() + geom_line(data= Dat_taizz.a, aes(counter, (Airstrike)^(1/2), col="Airstrike^1/2")) + geom_line(data = dat_taizz.f, aes(x=COUNTER,y=Mean, col ="Food Consumption Score")) + xlab("Months Since Start of Bombardment") + ggtitle("Taizz Airstrikes and Food Consumption Score from Jan 2015-May 2018") + scale_x_continuous(limits = c(0, 45)) + theme(legend.position="bottom")
+Taizz
+```
+
+
+##Hajjah
+```{r include=FALSE}
+# Hajjah - Data 
+Dat_hajjah.a <-airstrikes_sum %>% filter(Governate=="Hajjah")
+dat_hajjah.f <-food %>% filter(AdminStrata=="Hajjah")
+```
+
+
+```{r echo=FALSE, warning=FALSE}
+Hajjah<- ggplot() + geom_line(data= Dat_hajjah.a, aes(counter, (Airstrike^(1/2)), col="Airstrike^(1/2)")) + geom_line(data = dat_hajjah.f, aes(x=COUNTER,y=Mean, col = "Food Consumption Score")) + xlab("Months Since Start of Bombardment") + ylab("") + ggtitle("Hajjah Airstrikes and Food Consumption Score from Jan 2015-May 2018") + scale_x_continuous(limits = c(0, 45)) + theme(legend.position="bottom")
+Hajjah
+```
+
+
+##Marib
+```{r include=FALSE}
+# Marib - Data 
+Dat_Marib.a <-airstrikes_sum %>% filter(Governate=="Marib")
+dat_Marib.f <-food %>% filter(AdminStrata=="Marib")
+```
+
+
+```{r echo=FALSE, warning=FALSE}
+Marib<- ggplot() + geom_line(data= Dat_Marib.a, aes(counter, (Airstrike^(1/2)), col="Airstrike^(1/2)")) + geom_line(data = dat_hajjah.f, aes(x=COUNTER,y=Mean, col = "Food Consumption Score")) + xlab("Months Since Start of Bombardment") + ylab("") + ggtitle("Marib Airstrikes and Food Consumption Score from Jan 2015-May 2018")
+Marib + scale_x_continuous(limits = c(0, 45)) + theme(legend.position="bottom")
+```
+
+
+
+
+```{r eval=FALSE, include=FALSE}
+plot_strike_T <- airstrikes_as %>% ggplot(aes(Date,Airstrikes)) + geom_point()
+
+plot_strike_T
+```
+
+
+
+
+
+
+
+
+
