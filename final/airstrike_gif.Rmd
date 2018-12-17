@@ -1,0 +1,123 @@
+---
+title: "Map"
+author: "daisy"
+date: "2018年12月10日"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+```
+
+## R Markdown
+
+
+```{r}
+library(sf)
+library(ggplot2)
+library(tidyverse)
+library(readxl)
+library(rgdal)
+library(ggplot2)
+library(dplyr)
+library(maptools)
+library(patchwork)
+library(animation)
+```
+
+```{r}
+airstrike <- read_excel("./airstrike_log&lat_new.xlsx")
+FSC<-read_excel("./FSC_Long1.xlsx")
+```
+
+```{r}
+myZipFile<-"http://biogeo.ucdavis.edu/data/diva/adm/YEM_adm.zip"
+download.file(myZipFile,destfile = "Yemen.zip")
+unzip("Yemen.zip")
+```
+
+
+
+```{r}
+airstrike <- airstrike%>%
+  mutate(Monthtext=format(as.Date(airstrike$Date,format="%d/%m/%Y"), "%Y/%m"))
+airstrike <- airstrike%>%
+  mutate(Month=as.numeric(factor(airstrike$Monthtext)))
+```
+
+
+```{r}
+yemen.adm1.shp <- readOGR(dsn=".", layer="YEM_adm1", stringsAsFactors = FALSE)
+yemen.adm1.shp.df <- fortify(yemen.adm1.shp, region = "NAME_1")
+
+```
+
+```{r warning=FALSE}
+yemen.adm1.shp.df <- merge(yemen.adm1.shp.df, FSC, by ="id")
+```
+
+
+```{r}
+invisible(saveGIF({
+  for (i in 1:37){
+theme_bare2 <- theme(
+  axis.line = element_blank(), 
+  axis.text.x = element_blank(), 
+  axis.text.y = element_blank(),
+  axis.ticks = element_blank(), 
+  axis.title.x = element_blank(), 
+  axis.title.y = element_blank(),
+  panel.background = element_blank(),
+  panel.border = element_rect(colour = "black", fill=NA, size=0.5),
+     plot.margin = margin(0.5,0.5,0.5,0.5, "cm"))
+
+p1 <- 
+  ggplot(data = NULL, aes(x = `X-coordinate`, y = `Y-coordinate`)) +
+  geom_polygon(data = yemen.adm1.shp.df, aes(long, lat.x, group = group), fill = "#f5f5dc",color = 'gray', size = 0.1)+
+  geom_point(data = filter(airstrike, Month==i),aes(x=lon,y=lat), 
+            color = "#b22222", size = 4, shape = 16)+
+  ggtitle("Location of Air Strikes") + theme(plot.title = element_text(lineheight=3, face="bold", color="#000099", size=29))+
+  theme_bare2
+
+theme_bare <- theme(
+  axis.line = element_blank(), 
+  axis.text.x = element_blank(), 
+  axis.text.y = element_blank(),
+  axis.ticks = element_blank(), 
+  axis.title.x = element_blank(), 
+  axis.title.y = element_blank(),
+  legend.text=element_text(size=3),
+  legend.title=element_text(size=5),
+  panel.background = element_blank(),
+  panel.border = element_rect(colour = "black", fill=NA, size=0.5),
+  plot.margin = margin(0.5,0.5,0.5,0.5,"cm"))
+
+p2 <- ggplot(data = yemen.adm1.shp.df, aes(x = long, y = lat.x, group = group))+
+      geom_polygon(data = filter(yemen.adm1.shp.df, Month==i),aes(fill = Mean), color = 'gray', size = 0.1) +
+      scale_fill_gradient(high = "#e34a33", low = "#fee8c8", guide = "colorbar") +
+      coord_fixed(1.3)+
+      guides(fill=guide_colorbar(title="Food Consumption Score"))+
+      theme_bare+
+      ggtitle("Food Consumption Scores") + theme(plot.title = element_text(lineheight=3, face="bold", color="#000099", size=29))
+   
+p3 <- 
+    ggplot(data = airstrike, aes(x = Month, y = 1)) +
+    geom_line() +
+    geom_point(aes(fill = (x = Month > i)), shape = 21, size = 8) +
+    theme_void() +
+    theme(legend.position = "none") +
+    scale_fill_manual(values = c("#daa520","#b22222")) +
+    geom_text(aes(x =i, y = 1, label = i), vjust = -1, size = 5) +
+    theme(panel.background = element_rect(colour = "black", fill=NA, size=0.5))
+  
+  print(p1-p2- p3 + plot_layout(ncol = 1, heights = c(15, 15)))
+  }
+}, movie.name = "airstrike13.gif", interval = 1.5, ani.width = 2000, ani.height =2000))
+```
+
+
+
+
+
+
+
+
