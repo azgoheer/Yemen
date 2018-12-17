@@ -123,7 +123,7 @@ shinyApp(ui, server)
 #Rshiny setup
 
 #install.packages('rsconnect')
-rsconnect::setAccountInfo(name='candastsai', token='FA4BCD1D00F632FE84CD4A95A840C981', secret='JOcJyS4RTrsg7PRCg7vuHZywfKfZ9QemCfTB/Yf8')
+rsconnect::setAccountInfo('')
 library(rsconnect)
-rsconnect::deployApp('')
+rsconnect::deployApp('path/to/the/app')
 ```
