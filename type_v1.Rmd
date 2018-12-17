@@ -1,0 +1,129 @@
+---
+title: "Type"
+author: "Candas"
+date: "20181213"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+rm(list = ls())
+library(tidyverse)
+library(tidyr)
+library(lme4)
+library(foreign)
+library(haven)
+library(lmerTest)
+library(lmtest)
+library(arm)
+library(texreg)
+library(stargazer)
+library(psych)
+library(kableExtra)
+library(dplyr)
+library(nlme)
+library(ggplot2)
+library(lmtest)
+library(formula.tools)
+library(texreg)
+library(sf)
+library(readxl)
+library(anytime)
+getwd()
+/Users/candastsai/shinyapp
+~/shinyapp
+|-- app.R
+```
+
+
+
+
+```{r}
+#read the airstrike_type data
+type <- read_excel("airstrike_type.xlsx")
+head(type)
+
+colnames(type)[colnames(type)=="Main category"] <- "category_raw"
+
+type <- type %>%
+        mutate(time = as.numeric(as.character(as.Date(Date, format = "%d/%m/%Y"), format="%Y%m")))
+
+type <- 
+  type %>% dplyr::select(4, 6, 8)
+
+type <-
+  type %>% mutate(lower = tolower(category_raw))
+
+colnames(type)[colnames(type)=="lower"] <- "category"
+
+type <- 
+  type %>% dplyr::select(1, 3, 4)
+
+#make the type_mean for each timing and location
+type_use <- type %>%
+  group_by(Governorate, category, time) %>%
+  summarize(total.count = n())
+
+```
+
+plotting the bars
+```{r}
+
+```
+
+
+```{r}
+library(shiny)
+
+ui <- fluidPage(
+
+  # App title ----
+  titlePanel("Airstrike types in Yemen"),
+
+  # Sidebar layout with input and output definitions ----
+  sidebarLayout(
+
+    # Sidebar to demonstrate various slider options ----
+    sidebarPanel(
+
+      # Input: year ----
+      selectInput("year", "Year-Month",
+                  choices = (type_use$time)),
+      
+      # Input: Gov ----
+      selectInput("gov", "Governorate",
+                  choices = (type_use$Governorate))
+      
+    ),
+
+    # Main panel for displaying outputs ----
+    mainPanel(
+      plotOutput("graphs")
+    )
+  )
+)
+
+server <- function(input, output, session) {
+
+  subsetData <- reactive({
+    newData <- filter(type_use, Governorate == input$gov, time == input$year)
+    return(newData)
+  })
+
+  output$graphs <- renderPlot({
+    ggplot(subsetData(), aes(x=subsetData()$category, y=subsetData()$total.count)) +
+      geom_bar(stat="identity", aes(fill=subsetData()$category))
+  })
+}
+
+# Create Shiny app ----
+shinyApp(ui, server)
+```
+
+```{r}
+#Rshiny setup
+
+#install.packages('rsconnect')
+rsconnect::setAccountInfo(name='candastsai', token='FA4BCD1D00F632FE84CD4A95A840C981', secret='JOcJyS4RTrsg7PRCg7vuHZywfKfZ9QemCfTB/Yf8')
+library(rsconnect)
+rsconnect::deployApp('')
+```
